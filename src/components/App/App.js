@@ -9,9 +9,15 @@ const App = () => {
   useEffect(() => {
     setSession(supabase.auth.session());
 
-    supabase.auth.onAuthStateChange((__event, session) => {
-      setSession(session);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (__event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => {
+      listener?.unsubscribe();
+    };
   }, []);
   return (
     <>

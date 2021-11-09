@@ -6,6 +6,7 @@ import { useColorModeValue } from '@chakra-ui/color-mode';
 import { FormLabel, FormControl } from '@chakra-ui/form-control';
 import { Input } from '@chakra-ui/input';
 import { Button } from '@chakra-ui/button';
+import { successToast, errorToast } from '../../utils/toast';
 
 const Auth = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(true);
@@ -27,21 +28,15 @@ const Auth = () => {
       if (error) throw error;
       !isLoggingIn &&
         toast({
-          position: 'top',
+          ...successToast,
           title: 'Success',
           description: 'Check your inbox to validate your account',
-          status: 'success',
-          duration: 5000,
-          isClosable: true,
         });
     } catch (error) {
       toast({
-        position: 'top',
+        ...errorToast,
         title: 'Error',
         description: error.error_description || error.message,
-        status: 'error',
-        duration: 9000,
-        isClosable: true,
       });
     } finally {
       setLoading(false);

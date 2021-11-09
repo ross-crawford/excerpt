@@ -1,9 +1,7 @@
 import React from 'react';
 import {
   Box,
-  Text,
   Flex,
-  Avatar,
   SkeletonCircle,
   HStack,
   Link,
@@ -19,12 +17,16 @@ import {
   Stack,
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
+import { useToast } from '@chakra-ui/toast';
 import { Link as RouterLink } from 'react-router-dom';
+import { supabase } from '../../lib/supabaseClient';
+import { navLinks } from '../../config/config';
+import { errorToast, successToast } from '../../utils/toast';
 
-const Links = ['Dashboard', 'Reviews', 'Profile'];
-
-const NavLink = ({ children }) => (
+const NavLink = ({ children, path }) => (
   <Link
+    as={RouterLink}
+    to={path}
     px={2}
     py={1}
     rounded={'md'}
@@ -39,6 +41,25 @@ const NavLink = ({ children }) => (
 
 const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({
+        ...successToast,
+        title: 'Logged out',
+        description: 'You have been logged out',
+      });
+    } catch (error) {
+      toast({
+        ...errorToast,
+        title: 'Error',
+        description: 'There was an error logging out',
+      });
+    }
+  };
 
   return (
     <>
@@ -67,8 +88,10 @@ const Navbar = () => {
               spacing={4}
               display={{ base: 'none', md: 'flex' }}
             >
-              {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+              {navLinks.map(({ name, path }) => (
+                <NavLink key={name} path={path}>
+                  {name}
+                </NavLink>
               ))}
             </HStack>
           </HStack>
@@ -91,10 +114,17 @@ const Navbar = () => {
                 <SkeletonCircle size="10" />
               </MenuButton>
               <MenuList>
-                <MenuItem>Link 1</MenuItem>
-                <MenuItem>Link 2</MenuItem>
+                <MenuItem as={RouterLink} to="/profile">
+                  Profile
+                </MenuItem>
+                <MenuItem as={RouterLink} to="/settings">
+                  Settings
+                </MenuItem>
+                <MenuItem as={RouterLink} to="/help">
+                  Help
+                </MenuItem>
                 <MenuDivider />
-                <MenuItem>Link 3</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </MenuList>
             </Menu>
           </Flex>
@@ -103,8 +133,10 @@ const Navbar = () => {
         {isOpen ? (
           <Box pb={4} display={{ md: 'none' }}>
             <Stack as={'nav'} spacing={4}>
-              {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+              {navLinks.map(({ name, path }) => (
+                <NavLink key={name} path={path}>
+                  {name}
+                </NavLink>
               ))}
             </Stack>
           </Box>
